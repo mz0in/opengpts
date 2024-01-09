@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  redis:
+    container_name: redis
+    image: redislabs/redisearch:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-volume:/data
+  backend:
+    build:
+      context: backend
+    ports:
+      - "8100:8100" # Backend is accessible on localhost:8100
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      PORT: 8100
+      REDIS_URL: "redis://redis:6379"
+
+  frontend:
+    build:
+      context: frontend
+    ports:
+      - "5173:5173" # Frontend is accessible on localhost:5173
+    environment:
+      VITE_BACKEND_URL: "http://backend:8100"
